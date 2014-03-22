@@ -5,6 +5,7 @@ import org.bson.types.ObjectId;
 import org.jongo.MongoCollection;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 /**
  * Created with IntelliJ IDEA.
@@ -48,8 +49,22 @@ public class GenericDAO<T extends Model> {
     }
 
     private Class<T> getType(){
-        ParameterizedType type = (ParameterizedType)this.getClass().getGenericSuperclass();
-        return (Class) type.getActualTypeArguments()[0];
+
+        return getSuperClassGenericType(getClass());
+
+        // @xianxing , 老是报错 ： java.lang.ClassCastException: java.lang.Class cannot be cast to java.lang.reflect.ParameterizedType
+        //ParameterizedType type = (ParameterizedType)this.getClass().getGenericSuperclass();
+        //return (Class) type.getActualTypeArguments()[0];
+    }
+
+    public static Class getSuperClassGenericType(Class c) {
+        Type genType = c.getGenericSuperclass();
+        if (!(genType instanceof ParameterizedType))
+            return Object.class;
+        Type [] params = ((ParameterizedType)genType).getActualTypeArguments();
+        if (!(params[0] instanceof  Class))
+            return Object.class;
+        return (Class)params[0];
     }
 
     public MongoCollection getCollection(){
